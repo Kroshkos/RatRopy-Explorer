@@ -261,13 +261,15 @@ def main(page: ft.Page):
         return str(datetime.timedelta(seconds=seconds))
 
     # Обновление таймера
+    # Замените функцию update_timer на следующую версию:
     async def update_timer():
         nonlocal timer_running
         while timer_running:
             elapsed = datetime.datetime.now() - start_time
             seconds = int(elapsed.total_seconds())
             timer_text.value = format_time(seconds)
-            await timer_text.update_async()
+            # Обновляем всю страницу, а не только текстовый элемент
+            await page.update_async()
             await asyncio.sleep(0.1)
 
 
@@ -335,8 +337,8 @@ def main(page: ft.Page):
         page.go("/experiment")
         page.update()
 
-        # Schedule the timer task on the main event loop
-        asyncio.create_task(update_timer())
+        # Запускаем таймер через page.run_task (передаем функцию, а не её вызов)
+        page.run_task(update_timer)
 
 
 
@@ -344,7 +346,6 @@ def main(page: ft.Page):
     def show_report(experiment):
         animal = get_animal_db(experiment['animal_id'])
         report_content.controls = [
-            ft.Text("Отчет об исследовании", size=24, weight="bold"),
             ft.Divider(),
             ft.Text(f"Дата: {experiment['date']}"),
             ft.Text(f"Животное: {animal['id']} ({animal['species']})"),
@@ -359,7 +360,7 @@ def main(page: ft.Page):
         report_content.controls.append(
             ft.ElevatedButton(
                 "Экспорт в PDF",
-                icon=ft.icons.PICTURE_AS_PDF,
+                icon=ft.Icons.PICTURE_AS_PDF,
                 on_click=lambda _: file_picker.save_file()
             )
         )
@@ -490,7 +491,7 @@ def main(page: ft.Page):
             
             animal_detail_view.controls = [
                 ft.Row([
-                    ft.IconButton(icon=ft.icons.ARROW_BACK, on_click=lambda _: page.go("/animals")),
+                    ft.IconButton(icon=ft.Icons.ARROW_BACK, on_click=lambda _: page.go("/animals")),
                     ft.Text(f"Животное: {animal['id']}", size=20),
                 ]),
                 ft.Text(f"Вид: {animal['species']}"),
@@ -506,7 +507,7 @@ def main(page: ft.Page):
         if edit:
             animal_detail_view.controls = [
                 ft.Row([
-                    ft.IconButton(icon=ft.icons.ARROW_BACK, on_click=lambda _: page.go("/animals")),
+                    ft.IconButton(icon=ft.Icons.ARROW_BACK, on_click=lambda _: page.go("/animals")),
                     ft.Text("Редактирование животного", size=20),
                 ]),
                 edit_species_input,
@@ -530,7 +531,7 @@ def main(page: ft.Page):
     new_experiment_view = ft.Column(
         controls=[
             ft.Row([
-                ft.IconButton(icon=ft.icons.ARROW_BACK, on_click=lambda _: page.go("/")),
+                ft.IconButton(icon=ft.Icons.ARROW_BACK, on_click=lambda _: page.go("/")),
                 ft.Text("Новое исследование", size=24),
             ]),
             date_input,
@@ -560,7 +561,7 @@ def main(page: ft.Page):
     experiment_view = ft.Column(
         controls=[
             ft.Row([
-                ft.IconButton(icon=ft.icons.ARROW_BACK, on_click=lambda _: page.go("/")),
+                ft.IconButton(icon=ft.Icons.ARROW_BACK, on_click=lambda _: page.go("/")),
                 ft.Text("Исследование", size=24),
             ]),
             ft.Row([
@@ -571,11 +572,11 @@ def main(page: ft.Page):
                 ]) if current_experiment else ft.Text(""),
                 ft.ElevatedButton("Завершить", color="red", on_click=finish_experiment)
             ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-            ft.Container(
-                content=timer_text,
-                alignment=ft.alignment.center,
-                padding=20
-            ),
+            #ft.Container(
+                #content=timer_text,
+                #alignment=ft.alignment.center,
+                #padding=20
+            #),
             ft.Text("Поведенческие акты:", weight="bold"),
             ft.Row(
                 controls=behavior_buttons,
@@ -587,7 +588,7 @@ def main(page: ft.Page):
             ft.Text("История событий:", weight="bold"),
             ft.Container(
                 content=ft.ListView(ref=events_list, expand=True),
-                border=ft.border.all(1, ft.colors.GREY_700),
+                border=ft.border.all(1, ft.Colors.GREY_700),
                 border_radius=10,
                 padding=10,
                 expand=True
