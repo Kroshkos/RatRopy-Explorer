@@ -136,7 +136,7 @@ def get_experiment_db(experiment_id):
 # Основное приложение
 def main(page: ft.Page):
     page.title = "RatRopy Explorer"
-    page.theme_mode = ft.ThemeMode.DARK  # Исправлено на темную тему
+    page.theme_mode = ft.ThemeMode.DARK
     page.padding = 20
     page.scroll = ft.ScrollMode.AUTO
 
@@ -261,14 +261,12 @@ def main(page: ft.Page):
         return str(datetime.timedelta(seconds=seconds))
 
     # Обновление таймера
-    # Замените функцию update_timer на следующую версию:
     async def update_timer():
         nonlocal timer_running
         while timer_running:
             elapsed = datetime.datetime.now() - start_time
             seconds = int(elapsed.total_seconds())
             timer_text.value = format_time(seconds)
-            # Обновляем всю страницу, а не только текстовый элемент
             await page.update_async()
             await asyncio.sleep(0.1)
 
@@ -329,15 +327,11 @@ def main(page: ft.Page):
         }
         start_time = datetime.datetime.now()
         timer_running = True
-
-        # Clear previous events
         if events_list.current:
             events_list.current.controls.clear()
 
         page.go("/experiment")
         page.update()
-
-        # Запускаем таймер через page.run_task (передаем функцию, а не её вызов)
         page.run_task(update_timer)
 
 
@@ -398,7 +392,7 @@ def main(page: ft.Page):
         page.go("/animals")
         page.update()
 
-    # UI Компоненты
+#======================================== UI Компоненты ============================================#
 
     # Главный экран
     welcome_view = ft.Column(
@@ -467,7 +461,7 @@ def main(page: ft.Page):
         controls=[
             ft.Text("Профиль животного", size=24),
             animal_cards,
-            ft.ElevatedButton("На главную", on_click=lambda _: page.go("/"))  # Добавлена кнопка
+            ft.ElevatedButton("На главную", on_click=lambda _: page.go("/"))
         ]
     )
 
@@ -545,7 +539,6 @@ def main(page: ft.Page):
     # Экран исследования
     behavior_buttons = []
     for behavior in BEHAVIORS:
-        # Используем замыкание для правильной привязки поведения
         def make_behavior_handler(b):
             return lambda e: behavior_clicked(b)
         
